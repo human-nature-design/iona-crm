@@ -154,23 +154,6 @@ CREATE TABLE IF NOT EXISTS "system_prompts" (
   "updated_at" timestamp DEFAULT now() NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "resources" (
-  "id" varchar(191) PRIMARY KEY NOT NULL,
-  "content" text NOT NULL,
-  "team_id" integer NOT NULL REFERENCES "teams"("id") ON DELETE NO ACTION,
-  "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE NO ACTION,
-  "created_at" timestamp DEFAULT now() NOT NULL,
-  "updated_at" timestamp DEFAULT now() NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS "embeddings" (
-  "id" varchar(191) PRIMARY KEY NOT NULL,
-  "resource_id" varchar(191) REFERENCES "resources"("id") ON DELETE CASCADE,
-  "content" text NOT NULL,
-  "embedding" extensions.vector(1536) NOT NULL,
-  "team_id" integer NOT NULL REFERENCES "teams"("id") ON DELETE NO ACTION
-);
-
 CREATE TABLE IF NOT EXISTS "chats" (
   "id" serial PRIMARY KEY NOT NULL,
   "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE NO ACTION,
@@ -217,21 +200,12 @@ CREATE INDEX idx_content_blocks_updated_by ON content_blocks(updated_by);
 -- collections
 CREATE INDEX idx_collections_team_id ON collections(team_id);
 
--- embeddings
-CREATE INDEX idx_embeddings_resource_id ON embeddings(resource_id);
-CREATE INDEX idx_embeddings_team_id ON embeddings(team_id);
-CREATE INDEX "embeddingIndex" ON "embeddings" USING hnsw ("embedding" extensions.vector_cosine_ops);
-
 -- invitations
 CREATE INDEX idx_invitations_invited_by ON invitations(invited_by);
 CREATE INDEX idx_invitations_team_id ON invitations(team_id);
 
 -- messages
 CREATE INDEX idx_messages_team_id ON messages(team_id);
-
--- resources
-CREATE INDEX idx_resources_team_id ON resources(team_id);
-CREATE INDEX idx_resources_user_id ON resources(user_id);
 
 -- system_prompts
 CREATE INDEX idx_system_prompts_team_id ON system_prompts(team_id);
@@ -518,8 +492,6 @@ ALTER TABLE "contacts" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "collections" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "content_blocks" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "system_prompts" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "resources" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "embeddings" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "chats" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "messages" ENABLE ROW LEVEL SECURITY;
 
@@ -574,12 +546,6 @@ CREATE POLICY "content_blocks_team_isolation" ON "content_blocks"
   FOR ALL USING (public.is_team_member(team_id)) WITH CHECK (public.is_team_member(team_id));
 
 CREATE POLICY "system_prompts_team_isolation" ON "system_prompts"
-  FOR ALL USING (public.is_team_member(team_id)) WITH CHECK (public.is_team_member(team_id));
-
-CREATE POLICY "resources_team_isolation" ON "resources"
-  FOR ALL USING (public.is_team_member(team_id)) WITH CHECK (public.is_team_member(team_id));
-
-CREATE POLICY "embeddings_team_isolation" ON "embeddings"
   FOR ALL USING (public.is_team_member(team_id)) WITH CHECK (public.is_team_member(team_id));
 
 CREATE POLICY "chats_team_isolation" ON "chats"

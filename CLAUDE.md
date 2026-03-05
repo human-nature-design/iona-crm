@@ -297,15 +297,13 @@ const { data } = await adminSupabase.from('teams').select('*');
 ```
 
 **RLS helper functions** (defined in migrations):
-- `get_auth_user_id()` - Returns UUID from `auth.uid()` or `request.jwt.claim.sub`
+- `get_auth_user_id()` - Returns UUID from `auth.uid()`
 - `get_app_user_id()` - Returns app user ID from Supabase auth
 - `is_team_member(team_id)` - Checks if current user belongs to team
 - `get_active_team_id()` - Returns user's primary team ID
 
 ### Environment Variables
 Required in `.env`:
-- `DATABASE_URL`: App database connection (uses `app_user` role, RLS enforced)
-- `ADMIN_DATABASE_URL`: Admin database connection (uses `postgres` role, bypasses RLS)
 - `OPENAI_API_KEY`: OpenAI API key for embeddings generation
 - `STRIPE_SECRET_KEY`: Stripe API key
 - `STRIPE_WEBHOOK_SECRET`: For validating webhooks
@@ -313,17 +311,6 @@ Required in `.env`:
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`: Supabase publishable key for client-side
 - `SUPABASE_SECRET_KEY`: Supabase secret key for server-side admin operations
-
-**Database URL format (Supabase pooler):**
-```
-# App connection (RLS enforced) - Port 5432 for session mode
-DATABASE_URL=postgresql://app_user.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres
-
-# Admin connection (RLS bypassed) - Port 6543 for transaction mode
-ADMIN_DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres
-```
-
-**Network Restrictions**: Supabase network restrictions are enabled, limiting direct Postgres/pooler connections to allowlisted IPs. If migrations or `psql` connections fail, your current IP may not be allowlisted. Check your IP with `curl ifconfig.me` and add it in Supabase Dashboard > Network Restrictions. This does not affect the REST API (supabase-js client).
 
 ## Theme Implementation
 This application supports **light, dark, and system themes** via next-themes:

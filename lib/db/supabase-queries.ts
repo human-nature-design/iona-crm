@@ -1342,11 +1342,7 @@ export async function hardDeleteUserAndTeam(
   await deleteFrom('chats', { team_id: teamId });
   // 3. activity_logs → users, teams
   await deleteFrom('activity_logs', { team_id: teamId });
-  // 4. embeddings → resources, teams
-  await deleteFrom('embeddings', { team_id: teamId });
-  // 5. resources → users, teams
-  await deleteFrom('resources', { team_id: teamId });
-  // 6. contacts → organizations, teams
+  // 4. contacts → organizations, teams
   await deleteFrom('contacts', { team_id: teamId });
   // 7. organizations → users, teams
   await deleteFrom('organizations', { team_id: teamId });

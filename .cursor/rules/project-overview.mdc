@@ -64,8 +64,6 @@ stripe listen --forward-to http://localhost:3000/api/stripe/webhook  # Listen fo
 
 ### Environment Variables
 Required in `.env`:
-- `DATABASE_URL`: App database connection (uses `app_user` role, RLS enforced)
-- `ADMIN_DATABASE_URL`: Admin database connection (uses `postgres` role, bypasses RLS)
 - `OPENAI_API_KEY`: OpenAI API key for embeddings generation
 - `STRIPE_SECRET_KEY`: Stripe API key
 - `STRIPE_WEBHOOK_SECRET`: For validating webhooks

@@ -279,45 +279,6 @@ export type Database = {
           },
         ]
       }
-      embeddings: {
-        Row: {
-          content: string
-          embedding: string
-          id: string
-          resource_id: string | null
-          team_id: number
-        }
-        Insert: {
-          content: string
-          embedding: string
-          id: string
-          resource_id?: string | null
-          team_id: number
-        }
-        Update: {
-          content?: string
-          embedding?: string
-          id?: string
-          resource_id?: string | null
-          team_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "embeddings_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "embeddings_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       invitations: {
         Row: {
           email: string
@@ -471,48 +432,6 @@ export type Database = {
           },
           {
             foreignKeyName: "companies_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resources: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          team_id: number
-          updated_at: string
-          user_id: number
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id: string
-          team_id: number
-          updated_at?: string
-          user_id: number
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          team_id?: number
-          updated_at?: string
-          user_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resources_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resources_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"

@@ -1,32 +1,26 @@
 # Iona CRM
 
-A generic CRM boilerplate for vibe coding on top of. 
+A generic CRM boilerplate for vibe coding on top of.
 
 ## Prerequisites
-
 - [Node.js](https://nodejs.org/) 18+
 - [pnpm](https://pnpm.io/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) (`npm install -g supabase`)
+- A [Supabase](https://supabase.com/) project
 
-## Local setup
+## Setup
 
-### 1. Start Supabase locally
+### 1. Create a Supabase project
+
+Via the CLI:
 
 ```bash
-npx supabase start
+npx supabase projects create "Iona CRM" --org-id YOUR_ORG_ID
 ```
 
-This spins up the full Supabase stack via Docker (Postgres with pgvector, Auth, REST API, Studio, email testing). All migrations in `supabase/migrations/` are applied automatically.
+Or create one at [supabase.com/dashboard](https://supabase.com/dashboard).
 
-The output will print your local URLs and keys — you'll need these for the next step.
-
-Useful local URLs:
-| Service | URL |
-|---------|-----|
-| Supabase Studio | http://127.0.0.1:54323 |
-| Inbucket (email testing) | http://127.0.0.1:54324 |
-| REST API | http://127.0.0.1:54321 |
+Note your project URL and API keys from Settings > API (or from the CLI output).
 
 ### 2. Configure environment
 
@@ -34,33 +28,38 @@ Useful local URLs:
 cp .env.example .env.local
 ```
 
-Fill in the keys from the `supabase start` output:
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` → the `anon key`
-- `SUPABASE_SECRET_KEY` → the `service_role key`
-
-Generate an auth secret:
-```bash
-openssl rand -hex 32
-```
+Fill in your Supabase project credentials:
+- `NEXT_PUBLIC_SUPABASE_URL` — your project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` — the `anon` public key
+- `SUPABASE_SECRET_KEY` — the `service_role` secret key
 
 Add your own API keys:
 - `OPENAI_API_KEY` — required for embeddings and AI features
 - `ANTHROPIC_API_KEY` — required for Anthropic model support
 - `STRIPE_SECRET_KEY` — required for billing (or leave as placeholder to skip)
 
-### 3. Install dependencies
+### 3. Push migrations
+
+Link your project and push the schema:
+
+```bash
+npx supabase link --project-ref YOUR_PROJECT_REF
+npx supabase db push
+```
+
+This creates all tables, RLS policies, and pgvector extensions in your hosted database.
+
+After pushing, regenerate TypeScript types to keep them in sync:
+
+```bash
+npx supabase gen types typescript --project-id YOUR_PROJECT_REF --schema public > lib/db/database.types.ts
+```
+
+### 4. Install dependencies
 
 ```bash
 pnpm install
 ```
-
-### 4. Seed the database
-
-```bash
-pnpm db:seed
-```
-
-Creates a test user: `test@test.com` / `admin123`
 
 ### 5. Start the dev server
 
@@ -68,22 +67,18 @@ Creates a test user: `test@test.com` / `admin123`
 pnpm dev
 ```
 
-Open http://localhost:3000.
-
-## Stopping Supabase
-
-```bash
-npx supabase stop           # Keeps data for next start
-npx supabase stop --no-backup  # Wipes all local data
-```
+Open http://localhost:3000
 
 ## Features
 
 ### Companies and contacts
+Create and manage companies with inline editing and a multi-stage pipeline (Lead, Opportunity, Client, Churned, Closed Lost). Each organization tracks details like website, industry, location, and employee size. Contacts live within organizations with inline-editable fields for name, email, phone, and location.
 
 ### Content library
+A knowledge base built around collections and content blocks. Collections group related content, and blocks represent individual capabilities or features with a title, category, and description. Supports bulk CSV import with flexible column mapping. All content is automatically embedded using OpenAI and stored as vectors in PostgreSQL for semantic search and referencing from the AI chat. 
 
 ### AI Chat
+A conversational assistant with streaming responses, persistent chat history, and tool-based access to the knowledge base. The assistant can search content semantically, browse collections and blocks, manage organizations, and navigate the app — with preview-based confirmations before any database writes.
 
 ## Tech Stack
 
@@ -114,15 +109,9 @@ pnpm test:e2e      # E2E tests (Playwright)
 
 See `__tests__/README.md` for detailed test documentation.
 
-## Using a hosted Supabase instance
-
-If you prefer a hosted Supabase project instead of running locally, see the commented-out section in `.env.example` for connection string formats. Push migrations with:
-
-```bash
-npx supabase link --project-ref YOUR_PROJECT_REF
-npx supabase db push
-```
-
 ## Environment Variables
 
 See `.env.example` for the full list with descriptions.
+
+## Deploying
+I'd recommend using Github for the repo and integrating directly to Vercel. It'll create a  preview deploy branch on each git branch and previews on every commit. It's the tightest CI/CD I've seen in the market. 

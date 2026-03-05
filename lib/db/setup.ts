@@ -2,9 +2,9 @@ import { exec } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import { promisify } from 'node:util';
 import readline from 'node:readline';
-import crypto from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
+
 
 const execAsync = promisify(exec);
 
@@ -77,75 +77,22 @@ async function checkStripeCLI() {
   }
 }
 
-async function getPostgresURL(): Promise<string> {
-  console.log('Step 2: Setting up Postgres');
-  const dbChoice = await question(
-    'Do you want to use a local Postgres instance with Docker (L) or a remote Postgres instance (R)? (L/R): '
+async function getSupabaseURL(): Promise<string> {
+  console.log('Step 2: Setting up Supabase');
+  console.log(
+    'You can create a Supabase project at: https://supabase.com/dashboard'
   );
-
-  if (dbChoice.toLowerCase() === 'l') {
-    console.log('Setting up local Postgres instance with Docker...');
-    await setupLocalPostgres();
-    return 'postgres://postgres:postgres@localhost:54322/postgres';
-  } else {
-    console.log(
-      'You can find Postgres databases at: https://vercel.com/marketplace?category=databases'
-    );
-    return await question('Enter your DATABASE_URL: ');
-  }
+  return await question('Enter your NEXT_PUBLIC_SUPABASE_URL: ');
 }
 
-async function setupLocalPostgres() {
-  console.log('Checking if Docker is installed...');
-  try {
-    await execAsync('docker --version');
-    console.log('Docker is installed.');
-  } catch (error) {
-    console.error(
-      'Docker is not installed. Please install Docker and try again.'
-    );
-    console.log(
-      'To install Docker, visit: https://docs.docker.com/get-docker/'
-    );
-    process.exit(1);
-  }
-
-  console.log('Creating docker-compose.yml file...');
-  const dockerComposeContent = `
-services:
-  postgres:
-    image: postgres:16.4-alpine
-    container_name: next_saas_starter_postgres
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "54322:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-`;
-
-  await fs.writeFile(
-    path.join(process.cwd(), 'docker-compose.yml'),
-    dockerComposeContent
-  );
-  console.log('docker-compose.yml file created.');
-
-  console.log('Starting Docker container with `docker compose up -d`...');
-  try {
-    await execAsync('docker compose up -d');
-    console.log('Docker container started successfully.');
-  } catch (error) {
-    console.error(
-      'Failed to start Docker container. Please check your Docker installation and try again.'
-    );
-    process.exit(1);
-  }
+async function getSupabaseAnonKey(): Promise<string> {
+  return await question('Enter your NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ');
 }
+
+async function getSupabaseSecretKey(): Promise<string> {
+  return await question('Enter your SUPABASE_SECRET_KEY: ');
+}
+
 
 async function getStripeSecretKey(): Promise<string> {
   console.log('Step 3: Getting Stripe Secret Key');
@@ -178,13 +125,8 @@ async function createStripeWebhook(): Promise<string> {
   }
 }
 
-function generateAuthSecret(): string {
-  console.log('Step 5: Generating AUTH_SECRET...');
-  return crypto.randomBytes(32).toString('hex');
-}
-
 async function writeEnvFile(envVars: Record<string, string>) {
-  console.log('Step 6: Writing environment variables to .env');
+  console.log('Step 5: Writing environment variables to .env');
   const envContent = Object.entries(envVars)
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
@@ -196,18 +138,19 @@ async function writeEnvFile(envVars: Record<string, string>) {
 async function main() {
   await checkStripeCLI();
 
-  const DATABASE_URL = await getPostgresURL();
+  const NEXT_PUBLIC_SUPABASE_URL = await getSupabaseURL();
+  const NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY = await getSupabaseAnonKey();
+  const SUPABASE_SECRET_KEY = await getSupabaseSecretKey();
   const STRIPE_SECRET_KEY = await getStripeSecretKey();
   const STRIPE_WEBHOOK_SECRET = await createStripeWebhook();
   const BASE_URL = 'http://localhost:3000';
-  const AUTH_SECRET = generateAuthSecret();
-
   await writeEnvFile({
-    DATABASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+    SUPABASE_SECRET_KEY,
     STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET,
     BASE_URL,
-    AUTH_SECRET,
   });
 
   console.log('🎉 Setup completed successfully!');
