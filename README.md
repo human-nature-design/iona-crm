@@ -3,10 +3,10 @@
 A generic CRM boilerplate for vibe coding on top of.
 
 ## Prerequisites
-- [Node.js](https://nodejs.org/) 18+
-- [pnpm](https://pnpm.io/)
-- [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) (`npm install -g supabase`)
-- A [Supabase](https://supabase.com/) project
+- [Node.js](https://nodejs.org/) 18+ [check with node --version]
+- [pnpm](https://pnpm.io/) [check with pnpm --version]
+- [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) [`npm install -g supabase` or check with npx supabase --version]
+- A [Supabase](https://supabase.com/) account (organization) and login (npx supabase login)
 
 ## Setup
 
@@ -14,13 +14,16 @@ A generic CRM boilerplate for vibe coding on top of.
 
 Via the CLI:
 
+Login (will open up OAuth for you to login in the browser)
+`npx supabase login`
+
 ```bash
-npx supabase projects create "Iona CRM" --org-id YOUR_ORG_ID
+npx supabase projects create "Iona CRM" --org-id ejltovwzgzbzfmerghmq
 ```
 
 Or create one at [supabase.com/dashboard](https://supabase.com/dashboard).
 
-Note your project URL and API keys from Settings > API (or from the CLI output).
+Note your project URL and API keys from Settings > API
 
 ### 2. Configure environment
 
@@ -30,12 +33,11 @@ cp .env.example .env.local
 
 Fill in your Supabase project credentials:
 - `NEXT_PUBLIC_SUPABASE_URL` — your project URL
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` — the `anon` public key
-- `SUPABASE_SECRET_KEY` — the `service_role` secret key
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` — the `anon` pu key
+- `SUPABASE_SECRET_KEY` — the `service_role` secret key (Project settings > API Keys)
 
 Add your own API keys:
-- `OPENAI_API_KEY` — required for embeddings and AI features
-- `ANTHROPIC_API_KEY` — required for Anthropic model support
+- `OPENAI_API_KEY` — required for embeddings and AI features. From platform.openai.com
 - `STRIPE_SECRET_KEY` — required for billing (or leave as placeholder to skip)
 
 ### 3. Push migrations
@@ -72,10 +74,10 @@ Open http://localhost:3000
 ## Features
 
 ### Companies and contacts
-Create and manage companies with inline editing and a multi-stage pipeline (Lead, Opportunity, Client, Churned, Closed Lost). Each organization tracks details like website, industry, location, and employee size. Contacts live within organizations with inline-editable fields for name, email, phone, and location.
+Create and manage companies with inline editing and a multi-stage pipeline (Lead, Opportunity, Client, Churned, Closed Lost). Each organiztracks details like website, industry, location, and employee size. Contacts live within organizations with inline-editable fields for name, email, phone, and location.
 
 ### Content library
-A knowledge base built around collections and content blocks. Collections group related content, and blocks represent individual capabilities or features with a title, category, and description. Supports bulk CSV import with flexible column mapping. All content is automatically embedded using OpenAI and stored as vectors in PostgreSQL for semantic search and referencing from the AI chat. 
+A knowledge base built around collections and content blocks. Collections group related content, and blocks represent individual capabilities or features with a title, category, and description. Supports bulk CSV import with flexible column mapping. All content is automatically embedded using OpenAI and stored as vectors in PostgreSQL for semantic search and referencing from the AI chat.
 
 ### AI Chat
 A conversational assistant with streaming responses, persistent chat history, and tool-based access to the knowledge base. The assistant can search content semantically, browse collections and blocks, manage organizations, and navigate the app — with preview-based confirmations before any database writes.
@@ -114,4 +116,4 @@ See `__tests__/README.md` for detailed test documentation.
 See `.env.example` for the full list with descriptions.
 
 ## Deploying
-I'd recommend using Github for the repo and integrating directly to Vercel. It'll create a  preview deploy branch on each git branch and previews on every commit. It's the tightest CI/CD I've seen in the market. 
+I'd recommend using Github for the repo and integrating directly to Vercel. It'll create a  preview deploy branch on each git branch and previews on every commit. It's the tightest CI/CD I've seen in the market.

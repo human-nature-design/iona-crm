@@ -22,7 +22,6 @@ export type Collection = Tables<'collections'>;
 export type ContentBlock = Tables<'content_blocks'>;
 export type Organization = Tables<'organizations'>;
 export type Contact = Tables<'contacts'>;
-export type SystemPrompt = Tables<'system_prompts'>;
 export type ActivityLog = Tables<'activity_logs'>;
 export type Invitation = Tables<'invitations'>;
 
@@ -827,118 +826,6 @@ export async function bulkCreateBlocks(blocks: TablesInsert<'content_blocks'>[])
 }
 
 // =============================================================================
-// System Prompt Operations
-// =============================================================================
-
-export async function getAllSystemPrompts(team_id: number) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('system_prompts')
-    .select('*')
-    .eq('team_id', team_id)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching system prompts:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-export async function getActiveSystemPrompt(team_id: number) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('system_prompts')
-    .select('*')
-    .eq('team_id', team_id)
-    .eq('is_active', true)
-    .single();
-
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching active system prompt:', error);
-    return null;
-  }
-
-  return data;
-}
-
-export async function createSystemPrompt(promptData: TablesInsert<'system_prompts'>) {
-  const supabase = await createClient();
-
-  // If this prompt is active, deactivate others first
-  if (promptData.is_active) {
-    await supabase
-      .from('system_prompts')
-      .update({ is_active: false })
-      .eq('team_id', promptData.team_id);
-  }
-
-  const { data, error } = await supabase
-    .from('system_prompts')
-    .insert(promptData)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating system prompt:', error);
-    throw error;
-  }
-
-  return data;
-}
-
-export async function updateSystemPrompt(
-  prompt_id: number,
-  team_id: number,
-  updates: TablesUpdate<'system_prompts'>
-) {
-  const supabase = await createClient();
-
-  // If setting this prompt as active, deactivate others first
-  if (updates.is_active) {
-    await supabase
-      .from('system_prompts')
-      .update({ is_active: false })
-      .eq('team_id', team_id)
-      .neq('id', prompt_id);
-  }
-
-  const { data, error } = await supabase
-    .from('system_prompts')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', prompt_id)
-    .eq('team_id', team_id)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating system prompt:', error);
-    return null;
-  }
-
-  return data;
-}
-
-export async function deleteSystemPrompt(prompt_id: number, team_id: number) {
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from('system_prompts')
-    .delete()
-    .eq('id', prompt_id)
-    .eq('team_id', team_id);
-
-  if (error) {
-    console.error('Error deleting system prompt:', error);
-    return false;
-  }
-
-  return true;
-}
-
 // =============================================================================
 // Vector Operations (using RPC functions)
 // =============================================================================
@@ -1024,45 +911,6 @@ export async function updateTeam(team_id: number, updates: TablesUpdate<'teams'>
 }
 
 // Default system prompt for new teams
-const DEFAULT_SYSTEM_PROMPT = `You are a helpful assistant. You provide clear, accurate, and concise responses to help users with their questions and tasks.`;
-
-export async function ensureDefaultSystemPrompt(team_id: number) {
-  const supabase = await createClient();
-
-  // Check if team already has a system prompt
-  const { data: existing } = await supabase
-    .from('system_prompts')
-    .select('id')
-    .eq('team_id', team_id)
-    .limit(1)
-    .single();
-
-  if (existing) return;
-
-  await supabase
-    .from('system_prompts')
-    .insert({
-      team_id,
-      name: 'Default prompt',
-      prompt: DEFAULT_SYSTEM_PROMPT,
-      is_active: true,
-    });
-}
-
-/**
- * Create default system prompt for a new team using admin client (for signup flow)
- */
-export async function createDefaultSystemPromptForNewTeam(team_id: number, adminSupabase: ReturnType<typeof createAdminClient>) {
-  await adminSupabase
-    .from('system_prompts')
-    .insert({
-      team_id,
-      name: 'Default prompt',
-      prompt: DEFAULT_SYSTEM_PROMPT,
-      is_active: true,
-    });
-}
-
 // =============================================================================
 // Vector Operations with Embedding Generation
 // =============================================================================

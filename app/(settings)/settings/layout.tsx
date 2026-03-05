@@ -20,7 +20,6 @@ export default function DashboardLayout({
     { href: '/settings/general', icon: Settings, label: 'General' },
     { href: '/settings/security', icon: Shield, label: 'Security' },
     { href: '/settings/activity', icon: Activity, label: 'Activity' },
-    { href: '/settings/ai', icon: Settings, label: 'AI configuration' },
   ];
 
   return (

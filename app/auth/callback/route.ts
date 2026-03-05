@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createDefaultSystemPromptForNewTeam } from '@/lib/db/supabase-queries';
 import { NextResponse } from 'next/server';
 import { EmailOtpType } from '@supabase/supabase-js';
 
@@ -254,9 +253,6 @@ async function handleNewAuthUser(
     console.error('Failed to create team membership for new OAuth user:', teamMemberError);
     return;
   }
-
-  // Create default system prompt for the new team
-  await createDefaultSystemPromptForNewTeam(newTeam.id, adminSupabase);
 
   // Log activities
   await adminSupabase

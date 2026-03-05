@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { ActivityType } from '@/lib/db/schema';
 import { redirect } from 'next/navigation';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getUser, getUserWithTeam, countTeamMembersAndInvitations, getTeamById, createDefaultSystemPromptForNewTeam, hardDeleteUserAndTeam } from '@/lib/db/supabase-queries';
+import { getUser, getUserWithTeam, countTeamMembersAndInvitations, getTeamById, hardDeleteUserAndTeam } from '@/lib/db/supabase-queries';
 import { getPlanLimits } from '@/lib/plans/limits';
 import {
   validatedAction,
@@ -210,8 +210,6 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     teamId = newTeam.id;
     userRole = 'owner';
 
-    // Create default system prompt for new team
-    await createDefaultSystemPromptForNewTeam(teamId, adminSupabase);
   }
 
   // Create team member

@@ -16,7 +16,6 @@ export type Collection = Tables['collections']['Row'];
 export type ContentBlock = Tables['content_blocks']['Row'];
 export type Chat = Tables['chats']['Row'];
 export type Message = Tables['messages']['Row'];
-export type SystemPrompt = Tables['system_prompts']['Row'];
 
 // Insert types
 export type NewUser = Tables['users']['Insert'];
@@ -30,7 +29,6 @@ export type NewCollection = Tables['collections']['Insert'];
 export type NewContentBlock = Tables['content_blocks']['Insert'];
 export type NewChat = Tables['chats']['Insert'];
 export type NewMessage = Tables['messages']['Insert'];
-export type NewSystemPrompt = Tables['system_prompts']['Insert'];
 
 // Complex composite types
 export type TeamDataWithMembers = Team & {
