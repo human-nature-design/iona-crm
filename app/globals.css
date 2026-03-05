@@ -1,0 +1,411 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+/*
+  ---break---
+*/
+@custom-variant dark (&:is(.dark *));
+
+@import "tw-animate-css";
+
+@variant dark (&:is(.dark *));
+
+/* Static theme tokens (fonts, custom colors, radii) */
+@theme {
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom Font Families */
+  --font-family-office-times: "Office Times", Georgia, serif;
+  --font-family-office-times-round: "Office Times", Georgia, serif;
+  --font-family-office-times-mono: "Office Times Mono", "Courier New", monospace;
+  --font-family-office-times-sharp: "Office Times Sharp", Georgia, serif;
+  --font-family-office-times-sharp-mono: "Office Times Sharp Mono", "Courier New", monospace;
+  --font-family-ibm-plex-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  /* Custom Colors */
+  --color-beige: #f4f0e6;
+  --color-beige-light: rgba(244, 240, 230, 0.95);
+  --color-grid-line: #d4c4b0;
+  --color-hotpink: #ff69b4;
+  --color-purple: #6b5b95;
+
+  /* Brand Colors */
+  --color-brand-black: #141414;
+  --color-brand-offwhite: #F2EEE2;
+
+  /* Marketing Colors (used in calculator, landing pages) */
+  --color-marketing-cream: #FAF7F2;
+  --color-marketing-warm: #FFFDF9;
+  --color-marketing-sand: #E8E0D4;
+  --color-marketing-terracotta: #D66320;
+  --color-marketing-terracotta-light: #E87A3A;
+  --color-marketing-forest: #2D4A3E;
+  --color-marketing-charcoal: #2C2C2C;
+  --color-marketing-slate: #5A5A5A;
+  --color-marketing-muted: #8A8A8A;
+  --color-marketing-card: #FFFFFF;
+  --color-marketing-card-subtle: #f7f4ee;
+  --color-marketing-green: #2D7A4F;
+  --color-marketing-border: #E8E0D4;
+  --color-marketing-border-strong: #d0c4b4;
+}
+
+/* Dynamic theme tokens - uses @theme inline so Tailwind resolves at runtime */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  
+  /* Fix for Radix UI Select with Tailwind CSS v4 */
+  [data-radix-select-viewport] {
+    position: relative;
+  }
+  
+  /* Ensure select dropdowns appear above modals */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+  
+  /* Also ensure the select content has proper z-index */
+  [data-radix-select-content] {
+    z-index: 9999 !important;
+  }
+}
+
+/* Custom Font Declarations */
+@font-face {
+  font-family: 'Office Times';
+  src: url('/fonts/OfficeTimesRound-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Office Times Mono';
+  src: url('/fonts/OfficeTimesRound-RoundMono.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Office Times Sharp';
+  src: url('/fonts/OfficeTimesSharp-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Office Times Sharp Mono';
+  src: url('/fonts/OfficeTimesSharp-RegularMono.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@layer utilities {
+  body {
+    font-family: "Manrope", Arial, Helvetica, sans-serif;
+  }
+  
+  .font-office-times {
+    font-family: var(--font-family-office-times);
+  }
+  
+  .font-office-times-round {
+    font-family: var(--font-family-office-times-round);
+  }
+  
+  .font-office-times-mono {
+    font-family: var(--font-family-office-times-mono);
+  }
+  
+  .font-office-times-sharp {
+    font-family: var(--font-family-office-times-sharp);
+  }
+  
+  .font-office-times-sharp-mono {
+    font-family: var(--font-family-office-times-sharp-mono);
+  }
+  
+  .font-ibm-plex-mono {
+    font-family: var(--font-family-ibm-plex-mono);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: hsl(240 10% 3.9%);
+  --chart-1: hsl(12 76% 61%);
+  --chart-2: hsl(173 58% 39%);
+  --chart-3: hsl(197 37% 24%);
+  --chart-4: hsl(43 74% 66%);
+  --chart-5: hsl(27 87% 67%);
+  --radius: 0.6rem;
+  --sidebar-background: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+  --background: hsl(0 0% 8%);
+  --foreground: hsl(45 27% 92%);
+  --card: hsl(0 0% 8%);
+  --card-foreground: hsl(45 27% 92%);
+  --popover: hsl(0 0% 8%);
+  --popover-foreground: hsl(45 27% 92%);
+  --primary: hsl(45 27% 92%);
+  --primary-foreground: hsl(0 0% 8%);
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(45 27% 92%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(45 27% 92%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(45 27% 92%);
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: hsl(240 4.9% 83.9%);
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+  --sidebar-background: hsl(0 0% 8%);
+  --sidebar-foreground: hsl(45 27% 92%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 8%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(45 27% 92%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Marketing Colors - Dark Mode */
+.dark {
+  --color-marketing-cream: #141414;
+  --color-marketing-warm: #1c1c1c;
+  --color-marketing-sand: #2a2a2a;
+  --color-marketing-charcoal: #f5f5f5;
+  --color-marketing-slate: #b0b0b0;
+  --color-marketing-muted: #666666;
+  --color-marketing-card: #1c1c1c;
+  --color-marketing-card-subtle: #1e1e1e;
+  --color-marketing-border: #333333;
+  --color-marketing-border-strong: #444444;
+}
+
+
+/*
+  ---break---
+*/
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Dark mode scrollbar styles */
+  .dark {
+    scrollbar-color: hsl(240 3.7% 25%) hsl(240 3.7% 15.9%);
+    scrollbar-width: thin;
+  }
+
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: hsl(240 3.7% 15.9%);
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(240 3.7% 30%);
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 3.7% 40%);
+  }
+}
+
+/* Custom table styles for match results */
+@layer components {
+  .match-table {
+    @apply min-w-full border-collapse rounded-lg overflow-hidden;
+    background-color: #faf9f7;
+  }
+  
+  .dark .match-table {
+    background-color: #1a1917;
+  }
+  
+  /* Custom range slider styles */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  
+  input[type="range"]::-webkit-slider-track {
+    @apply h-2 rounded-lg;
+  }
+  
+  input[type="range"]::-moz-range-track {
+    @apply h-2 rounded-lg;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    @apply h-5 w-5 rounded-full bg-white shadow-md border-2 border-primary;
+    margin-top: -6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    @apply h-5 w-5 rounded-full bg-white shadow-md border-2 border-primary;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  input[type="range"]:hover::-webkit-slider-thumb {
+    @apply scale-110 shadow-lg;
+  }
+  
+  input[type="range"]:hover::-moz-range-thumb {
+    @apply scale-110 shadow-lg;
+  }
+  
+  input[type="range"]:focus::-webkit-slider-thumb {
+    @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+  
+  input[type="range"]:focus::-moz-range-thumb {
+    @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+  
+  .match-table-header {
+    background-color: #edeae6;
+    @apply border-b border-gray-300/80;
+  }
+
+  .dark .match-table-header {
+    background-color: #252320;
+    @apply border-gray-700;
+  }
+  
+  .match-table-row {
+    @apply border-b border-gray-200 transition-colors;
+  }
+  
+  .dark .match-table-row {
+    @apply border-gray-700;
+  }
+  
+  .match-table-row:hover {
+    background-color: #f0ede9;
+  }
+  
+  .dark .match-table-row:hover {
+    background-color: #2a2725;
+  }
+  
+  .match-distance,
+  .match-similarity {
+    @apply font-mono text-sm;
+    color: #faf9f7;
+  }
+  
+  .dark .match-distance,
+  .dark .match-similarity {
+    color: #faf9f7;
+  }
+}

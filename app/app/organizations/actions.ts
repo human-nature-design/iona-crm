@@ -1,0 +1,163 @@
+'use server';
+
+import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
+import {
+  createOrganization,
+  updateOrganization,
+  deleteOrganization,
+  getOrganizationById,
+  logActivity,
+  getTeamForUser,
+  unlinkContactsFromOrganization,
+  getContactsForOrganization,
+  deleteContact,
+} from '@/lib/db/supabase-queries';
+import {
+  validatedActionWithUser
+} from '@/lib/auth/middleware';
+import { ActivityType } from '@/lib/db/schema';
+import { organizationStatusSchema, DEFAULT_ORGANIZATION_STATUS } from '@/lib/constants/organization';
+
+const createOrganizationSchema = z.object({
+  name: z.string().min(1, 'Organization name is required').max(255),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  website: z.string()
+    .transform((val) => {
+      if (!val) return '';
+      // Add https:// if no protocol is specified
+      if (val && !val.match(/^https?:\/\//)) {
+        return `https://${val}`;
+      }
+      return val;
+    })
+    .pipe(z.string().url().optional().or(z.literal(''))),
+  industry: z.string().optional(),
+  size: z.string().optional(),
+  status: organizationStatusSchema.optional().default(DEFAULT_ORGANIZATION_STATUS),
+});
+
+export const createOrganizationAction = validatedActionWithUser(
+  createOrganizationSchema,
+  async (data, _, user) => {
+    const team = await getTeamForUser();
+    if (!team) {
+      return { error: 'No team found' };
+    }
+
+    try {
+      const organization = await createOrganization({
+        name: data.name,
+        description: data.description || null,
+        location: data.location || null,
+        website: data.website || null,
+        industry: data.industry || null,
+        size: data.size || null,
+        status: data.status || 'Lead',
+        user_id: user.id,
+        team_id: team.id,
+      });
+
+      await logActivity(team.id, user.id, ActivityType.CREATE_ORGANIZATION);
+      revalidatePath('/organizations');
+      return { success: 'Organization created successfully', organization };
+    } catch (error) {
+      console.error('Failed to create organization:', error);
+      return { error: 'Failed to create organization' };
+    }
+  }
+);
+
+const updateOrganizationSchema = z.object({
+  id: z.string().transform((val) => parseInt(val, 10)),
+  name: z.string().min(1, 'Organization name is required').max(255),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  website: z.string()
+    .transform((val) => {
+      if (!val) return '';
+      // Add https:// if no protocol is specified
+      if (val && !val.match(/^https?:\/\//)) {
+        return `https://${val}`;
+      }
+      return val;
+    })
+    .pipe(z.string().url().optional().or(z.literal(''))),
+  industry: z.string().optional(),
+  size: z.string().optional(),
+  status: organizationStatusSchema.optional(),
+});
+
+export const updateOrganizationAction = validatedActionWithUser(
+  updateOrganizationSchema,
+  async (data, _, user) => {
+    const team = await getTeamForUser();
+    if (!team) {
+      return { error: 'No team found' };
+    }
+
+    try {
+      const organization = await getOrganizationById(data.id, team.id);
+      if (!organization) {
+        return { error: 'Organization not found' };
+      }
+
+      await updateOrganization(data.id, team.id, {
+        name: data.name,
+        description: data.description || null,
+        location: data.location || null,
+        website: data.website || null,
+        industry: data.industry || null,
+        size: data.size || null,
+        status: data.status || undefined,
+      });
+
+      await logActivity(team.id, user.id, ActivityType.UPDATE_ORGANIZATION);
+      revalidatePath('/organizations');
+      return { success: 'Organization updated successfully' };
+    } catch (error) {
+      console.error('Failed to update organization:', error);
+      return { error: 'Failed to update organization' };
+    }
+  }
+);
+
+const deleteOrganizationSchema = z.object({
+  id: z.string().transform((val) => parseInt(val, 10)),
+  deleteContacts: z.string().optional().transform((val) => val === 'true'),
+});
+
+export const deleteOrganizationAction = validatedActionWithUser(
+  deleteOrganizationSchema,
+  async (data, _, user) => {
+    const team = await getTeamForUser();
+    if (!team) {
+      return { error: 'No team found' };
+    }
+
+    try {
+      // Handle contacts before deleting org
+      if (data.deleteContacts) {
+        const contacts = await getContactsForOrganization(data.id, team.id);
+        for (const contact of contacts) {
+          await deleteContact(contact.id, team.id);
+        }
+      } else {
+        await unlinkContactsFromOrganization(data.id, team.id);
+      }
+
+      const result = await deleteOrganization(data.id, team.id);
+      if ('error' in result) {
+        return { error: result.error };
+      }
+
+      await logActivity(team.id, user.id, ActivityType.DELETE_ORGANIZATION);
+      revalidatePath('/organizations');
+      return { success: 'Organization deleted successfully' };
+    } catch (error) {
+      console.error('Failed to delete organization:', error);
+      return { error: 'Failed to delete organization' };
+    }
+  }
+);

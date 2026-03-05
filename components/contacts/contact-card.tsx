@@ -1,0 +1,106 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { UserCircle, MoreHorizontal, Trash2, Building2, Mail, Phone, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ContactWithOrganization } from '@/lib/db/supabase-queries';
+import Link from 'next/link';
+
+interface ContactCardProps {
+  contact: ContactWithOrganization;
+  onDelete?: (contact: ContactWithOrganization) => void;
+}
+
+export function ContactCard({ contact, onDelete }: ContactCardProps) {
+  const router = useRouter();
+
+  return (
+    <div
+      className="bg-card border border-border rounded-lg p-3 cursor-pointer hover:border-primary/30 transition-all duration-150 active:scale-[0.99]"
+      onClick={() => router.push(`/app/contacts/${contact.id}`)}
+    >
+      {/* Main row */}
+      <div className="flex items-center gap-3">
+        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <UserCircle className="h-4 w-4 text-primary" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <span className="font-medium text-sm truncate block">{contact.name}</span>
+          {contact.organization && (
+            <Link
+              href={`/app/organizations/${contact.organization.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 truncate"
+            >
+              <Building2 className="h-3 w-3 flex-shrink-0" />
+              {contact.organization.name}
+            </Link>
+          )}
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 flex-shrink-0">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            {contact.organization && (
+              <DropdownMenuItem asChild>
+                <Link href={`/app/organizations/${contact.organization.id}`}>
+                  <Building2 className="mr-2 h-4 w-4" />
+                  View organization
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <>
+                {contact.organization && <DropdownMenuSeparator />}
+                <DropdownMenuItem
+                  onClick={() => onDelete(contact)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Secondary info */}
+      {(contact.email || contact.phone || contact.city) && (
+        <div className="mt-2 pt-2 border-t border-border/50 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          {contact.email && (
+            <a href={`mailto:${contact.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 truncate hover:text-foreground transition-colors">
+              <Mail className="h-3 w-3 flex-shrink-0" />
+              {contact.email}
+            </a>
+          )}
+          {contact.phone && (
+            <span className="flex items-center gap-1">
+              <Phone className="h-3 w-3 flex-shrink-0" />
+              {contact.phone}
+            </span>
+          )}
+          {(contact.city || contact.state) && (
+            <span className="flex items-center gap-1 truncate">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              {[contact.city, contact.state].filter(Boolean).join(', ')}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,31 @@
+import { z } from 'zod';
+
+// ── Organization Statuses ────────────────────────────────────────────────────────
+export const ORGANIZATION_STATUSES = ['Lead', 'Opportunity', 'Client', 'Churned', 'Closed Lost'] as const;
+export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
+export const organizationStatusSchema = z.enum(ORGANIZATION_STATUSES);
+export const DEFAULT_ORGANIZATION_STATUS: OrganizationStatus = 'Lead';
+
+/** For <Select> / dropdown UI components */
+export const organizationStatusOptions = ORGANIZATION_STATUSES.map((s) => ({
+  value: s,
+  label: s,
+}));
+
+// ── Organization Sizes ───────────────────────────────────────────────────────────
+export const ORGANIZATION_SIZES = [
+  '1-10',
+  '11-50',
+  '51-200',
+  '201-500',
+  '501-1000',
+  '1000+',
+] as const;
+export type OrganizationSize = (typeof ORGANIZATION_SIZES)[number];
+export const organizationSizeSchema = z.enum(ORGANIZATION_SIZES);
+
+/** For <Select> / dropdown UI components */
+export const organizationSizeOptions = ORGANIZATION_SIZES.map((s) => ({
+  value: s,
+  label: `${s} employees`,
+}));

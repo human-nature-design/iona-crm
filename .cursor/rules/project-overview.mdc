@@ -1,0 +1,83 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a generic CRM boilerplate with agentic interaction built with Next.js 15.4 (canary) with React 19.1 and the App Router.
+
+## Key Commands
+
+### Development
+```bash
+pnpm dev          # Start development server with Turbopack
+pnpm build        # Build for production
+```
+
+### Database Management
+```bash
+pnpm db:setup     # Initial database setup (creates .env file)
+pnpm db:migrate   # Run database migrations
+pnpm db:seed      # Seed database with test data (test@test.com / admin123)
+npx supabase db push  # Push migrations to Supabase (preferred for RLS)
+```
+
+After pushing database changes, regenerate TypeScript types:
+```bash
+npx supabase gen types typescript --project-id "YOUR_PROJECT_ID" --schema public > lib/db/database.types.ts
+```
+
+### Stripe Development
+```bash
+stripe listen --forward-to http://localhost:3000/api/stripe/webhook  # Listen for webhooks locally
+```
+
+## Architecture Overview
+
+### Directory Structure
+- `/app`: Next.js App Router pages and API routes
+  - `(dashboard)`: Protected dashboard routes requiring authentication
+  - `(login)`: Public authentication pages
+  - `api/`: API endpoints for Stripe webhooks, team, and user management
+- `/components`: Reusable UI components using shadcn/ui
+- `/lib`: Core application logic
+  - `auth/`: Authentication middleware and session handling
+  - `db/`: Supabase PostgreSQL with pgvector (types, queries, migrations)
+  - `payments/`: Stripe integration for subscriptions
+  - `supabase/`: Supabase client setup (server, client, admin, middleware)
+
+### Key Technologies
+- **Database**: Supabase PostgreSQL with pgvector for embeddings
+- **Authentication**: Supabase Auth with SSR cookie handling
+- **Payments**: Stripe Checkout and Customer Portal
+- **UI**: Tailwind CSS 4.1 with shadcn/ui components
+- **State**: SWR for data fetching
+- **Validation**: Zod schemas with Server Actions
+
+### Important Patterns
+1. **Authentication**: Supabase Auth with route protection via Next.js middleware. Supabase clients in `lib/supabase/`.
+2. **Database**: Types defined in `lib/db/database.types.ts` (auto-generated), re-exported from `lib/db/schema.ts`. Use Supabase migrations for schema changes.
+3. **Server Actions**: Protected with `validatedAction` and `validatedActionWithUser` middleware for Zod validation and auth.
+4. **Activity Logging**: Built-in system for tracking user events in `lib/db/supabase-queries.ts`.
+5. **RBAC**: Basic roles (Owner/Member) implemented for teams.
+6. **Two Supabase clients**: `createClient()` (RLS enforced) and `createAdminClient()` (RLS bypassed).
+
+### Environment Variables
+Required in `.env`:
+- `DATABASE_URL`: App database connection (uses `app_user` role, RLS enforced)
+- `ADMIN_DATABASE_URL`: Admin database connection (uses `postgres` role, bypasses RLS)
+- `OPENAI_API_KEY`: OpenAI API key for embeddings generation
+- `STRIPE_SECRET_KEY`: Stripe API key
+- `STRIPE_WEBHOOK_SECRET`: For validating webhooks
+- `BASE_URL`: Application URL (http://localhost:3000 for dev)
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`: Supabase publishable key for client-side
+- `SUPABASE_SECRET_KEY`: Supabase secret key for server-side admin operations
+
+## Theme Implementation
+This application supports **light, dark, and system themes** via next-themes:
+- Users can toggle themes using the theme toggle in the navigation
+- ThemeProvider in root layout handles theme state with `defaultTheme="system"`
+- Do NOT add hardcoded `dark` classes to page containers
+- All shadcn/ui components automatically adapt to the current theme via CSS variables
+- Use semantic color tokens like `bg-background`, `text-foreground`, `border-border` etc.
