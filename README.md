@@ -18,7 +18,7 @@ Login (will open up OAuth for you to login in the browser)
 `npx supabase login`
 
 ```bash
-npx supabase projects create "Iona CRM" --org-id ejltovwzgzbzfmerghmq
+npx supabase projects create "Iona CRM" --org-id 
 ```
 
 Or create one at [supabase.com/dashboard](https://supabase.com/dashboard).
